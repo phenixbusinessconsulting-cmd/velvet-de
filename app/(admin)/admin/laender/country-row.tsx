@@ -5,6 +5,7 @@ import { Pencil, Trash2, Check, X, Loader2, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { updateCountry, deleteCountry } from "./actions"
+import { COUNTRY_OPTIONS } from "./flags"
 
 export interface CountryData {
   id: string
@@ -71,7 +72,19 @@ export function CountryRow({ country, inSortable }: { country: CountryData; inSo
         <Input value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} type="number" className="w-16 h-8 text-sm" />
       </td>
       <td className="px-4 py-3">
-        <Input value={form.flag} onChange={(e) => setForm({ ...form, flag: e.target.value })} placeholder="🇩🇪" maxLength={4} className="h-8 text-sm w-16 text-center" />
+        <select
+          value={COUNTRY_OPTIONS.find((o) => o.flag === form.flag)?.code ?? ""}
+          onChange={(e) => {
+            const opt = COUNTRY_OPTIONS.find((o) => o.code === e.target.value)
+            setForm({ ...form, flag: opt ? opt.flag : "" })
+          }}
+          className="h-8 w-28 rounded-[var(--r-md)] border border-[var(--border)] bg-[var(--surface-2)] px-1 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)]"
+        >
+          <option value="">—</option>
+          {COUNTRY_OPTIONS.map((o) => (
+            <option key={o.code} value={o.code}>{o.flag} {o.code}</option>
+          ))}
+        </select>
       </td>
       <td className="px-4 py-3 space-y-1">
         <Input value={form.nameDE} onChange={(e) => setForm({ ...form, nameDE: e.target.value })} placeholder="Deutsch" className="h-8 text-sm" />

@@ -5,6 +5,7 @@ import { Plus, Loader2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createCountry } from "./actions"
+import { COUNTRY_OPTIONS, slugify } from "./flags"
 
 export function AddCountryForm() {
   const [open, setOpen] = useState(false)
@@ -59,9 +60,29 @@ export function AddCountryForm() {
       {error && <p className="text-xs text-[var(--error)] mb-4">{error}</p>}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="space-y-1">
-          <label className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Drapeau</label>
-          <Input value={form.flag} onChange={(e) => setForm({ ...form, flag: e.target.value })} placeholder="🇩🇪" maxLength={4} className="h-9 text-sm text-center" />
+        <div className="space-y-1 col-span-2">
+          <label className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Drapeau / Pays</label>
+          <select
+            value={COUNTRY_OPTIONS.find((o) => o.flag === form.flag)?.code ?? ""}
+            onChange={(e) => {
+              const opt = COUNTRY_OPTIONS.find((o) => o.code === e.target.value)
+              if (!opt) { setForm({ ...form, flag: "" }); return }
+              setForm((f) => ({
+                ...f,
+                flag: opt.flag,
+                code: f.code || opt.code,
+                nameDE: f.nameDE || opt.nameDE,
+                nameEN: f.nameEN || opt.nameEN,
+                slug: f.slug || slugify(opt.nameDE),
+              }))
+            }}
+            className="h-9 w-full rounded-[var(--r-md)] border border-[var(--border)] bg-[var(--surface-2)] px-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)]"
+          >
+            <option value="">— Choisir un drapeau —</option>
+            {COUNTRY_OPTIONS.map((o) => (
+              <option key={o.code} value={o.code}>{o.flag} {o.nameDE}</option>
+            ))}
+          </select>
         </div>
         <div className="space-y-1">
           <label className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Nom DE *</label>
