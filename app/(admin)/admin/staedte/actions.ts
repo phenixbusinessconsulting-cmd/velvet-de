@@ -23,6 +23,7 @@ export async function updateCity(id: string, data: {
   showOnLanding?: boolean
   taglineDE?: string | null
   taglineFR?: string | null
+  countryId?: string | null
 }) {
   await assertAdmin()
   await prisma.city.update({ where: { id }, data })
@@ -41,6 +42,7 @@ export async function createCity(data: {
   showOnLanding: boolean
   taglineDE: string | null
   taglineFR: string | null
+  countryId: string | null
 }) {
   await assertAdmin()
   await prisma.city.create({ data })

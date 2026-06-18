@@ -6,13 +6,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createCity } from "./actions"
 
-export function AddCityForm() {
+interface CountryOption {
+  id: string
+  nameDE: string
+  flag: string | null
+}
+
+export function AddCityForm({ countries }: { countries: CountryOption[] }) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [form, setForm] = useState({
     nameDE: "", nameEN: "", slug: "", state: "", stateCode: "",
     sortOrder: 99, isActive: true, showOnLanding: false,
-    taglineDE: "", taglineFR: "",
+    taglineDE: "", taglineFR: "", countryId: countries[0]?.id ?? "",
   })
   const [error, setError] = useState<string | null>(null)
 
@@ -29,9 +35,10 @@ export function AddCityForm() {
           nameEN: form.nameEN || form.nameDE,
           taglineDE: form.taglineDE || null,
           taglineFR: form.taglineFR || null,
+          countryId: form.countryId || null,
         })
         setOpen(false)
-        setForm({ nameDE: "", nameEN: "", slug: "", state: "", stateCode: "", sortOrder: 99, isActive: true, showOnLanding: false, taglineDE: "", taglineFR: "" })
+        setForm({ nameDE: "", nameEN: "", slug: "", state: "", stateCode: "", sortOrder: 99, isActive: true, showOnLanding: false, taglineDE: "", taglineFR: "", countryId: countries[0]?.id ?? "" })
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : "Erreur")
       }
@@ -61,6 +68,21 @@ export function AddCityForm() {
       {error && <p className="text-xs text-[var(--error)] mb-4">{error}</p>}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="space-y-1">
+          <label className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Pays</label>
+          <select
+            value={form.countryId}
+            onChange={(e) => setForm({ ...form, countryId: e.target.value })}
+            className="h-9 w-full rounded-[var(--r-md)] border border-[var(--border)] bg-[var(--surface-2)] px-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)]"
+          >
+            {countries.length === 0 && <option value="">— Aucun pays —</option>}
+            {countries.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.flag ? `${c.flag} ` : ""}{c.nameDE}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="space-y-1">
           <label className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Nom DE *</label>
           <Input value={form.nameDE} onChange={(e) => setForm({ ...form, nameDE: e.target.value })} placeholder="München" className="h-9 text-sm" />

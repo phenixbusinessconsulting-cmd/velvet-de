@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import {
   LayoutDashboard, Users, Flag, Shield, ScrollText,
-  BarChart2, LogOut, Settings, MapPin, FileText
+  BarChart2, LogOut, Settings, MapPin, Globe, FileText
 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 import { getLocale, getMessages } from "@/lib/locale"
@@ -26,6 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/meldungen",        icon: Flag,            label: n.reports },
     { href: "/admin/verifizierungen",  icon: Shield,          label: n.verifications },
     { href: "/admin/bewertungen",      icon: BarChart2,       label: n.reviews },
+    { href: "/admin/laender",          icon: Globe,           label: n.countries },
     { href: "/admin/staedte",          icon: MapPin,          label: n.cities },
     { href: "/admin/legal",            icon: FileText,        label: n.legalPages },
     { href: "/admin/logs",             icon: ScrollText,      label: n.auditLogs },

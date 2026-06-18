@@ -421,6 +421,7 @@ const de = {
     reviews: "Bewertungen",
     auditLogs: "Audit-Logs",
     settings: "Einstellungen",
+    countries: "Länder",
     cities: "Städte",
     legalPages: "Rechtliche Seiten",
     proDashboard: "← Profi-Dashboard",

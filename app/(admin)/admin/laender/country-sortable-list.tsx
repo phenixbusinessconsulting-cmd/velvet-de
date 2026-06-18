@@ -19,33 +19,11 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { GripVertical, Loader2 } from "lucide-react"
-import { CityRow } from "./city-row"
-import { reorderCities } from "./actions"
+import { CountryRow, type CountryData } from "./country-row"
+import { reorderCountries } from "./actions"
 
-interface City {
-  id: string
-  nameDE: string
-  nameEN: string
-  slug: string
-  state: string
-  stateCode: string
-  sortOrder: number
-  isActive: boolean
-  showOnLanding: boolean
-  taglineDE: string | null
-  taglineFR: string | null
-  countryId: string | null
-  _count: { profiles: number }
-}
-
-interface CountryOption {
-  id: string
-  nameDE: string
-  flag: string | null
-}
-
-function SortableCityRow({ city, countries }: { city: City; countries: CountryOption[] }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: city.id })
+function SortableCountryRow({ country }: { country: CountryData }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: country.id })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -56,7 +34,6 @@ function SortableCityRow({ city, countries }: { city: City; countries: CountryOp
 
   return (
     <tr ref={setNodeRef} style={style} className="relative">
-      {/* Drag handle cell */}
       <td className="pl-2 pr-0 py-3 w-8">
         <button
           {...attributes}
@@ -67,23 +44,18 @@ function SortableCityRow({ city, countries }: { city: City; countries: CountryOp
           <GripVertical className="w-4 h-4" />
         </button>
       </td>
-      <CityRow city={city} countries={countries} inSortable />
+      <CountryRow country={country} inSortable />
     </tr>
   )
 }
 
-interface Props {
-  initialCities: City[]
-  countries: CountryOption[]
-}
-
-export function CitySortableList({ initialCities, countries }: Props) {
-  const [cities, setCities] = useState(initialCities)
+export function CountrySortableList({ initialCountries }: { initialCountries: CountryData[] }) {
+  const [countries, setCountries] = useState(initialCountries)
   const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
-    setCities(initialCities)
-  }, [initialCities])
+    setCountries(initialCountries)
+  }, [initialCountries])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -94,16 +66,13 @@ export function CitySortableList({ initialCities, countries }: Props) {
     const { active, over } = event
     if (!over || active.id === over.id) return
 
-    const oldIndex = cities.findIndex((c) => c.id === active.id)
-    const newIndex = cities.findIndex((c) => c.id === over.id)
-    const reordered = arrayMove(cities, oldIndex, newIndex)
+    const oldIndex = countries.findIndex((c) => c.id === active.id)
+    const newIndex = countries.findIndex((c) => c.id === over.id)
+    const reordered = arrayMove(countries, oldIndex, newIndex)
 
-    // Optimistic update
-    setCities(reordered)
-
-    // Persist new order
+    setCountries(reordered)
     startTransition(async () => {
-      await reorderCities(reordered.map((c, i) => ({ id: c.id, sortOrder: i + 1 })))
+      await reorderCountries(reordered.map((c, i) => ({ id: c.id, sortOrder: i + 1 })))
     })
   }
 
@@ -116,19 +85,19 @@ export function CitySortableList({ initialCities, countries }: Props) {
         </div>
       )}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={cities.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={countries.map((c) => c.id)} strategy={verticalListSortingStrategy}>
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-[var(--border)]">
                 <th className="w-8" />
-                {["#", "Nom", "Slug", "Pays", "État", "Taglines DE / FR", "Statut", "Profils", ""].map((h) => (
+                {["#", "Drapeau", "Nom", "Code", "Slug", "Statut", "Villes", ""].map((h) => (
                   <th key={h} className="px-4 py-3 text-[10px] tracking-widest uppercase text-[var(--text-muted)]">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {cities.map((city) => (
-                <SortableCityRow key={city.id} city={city} countries={countries} />
+              {countries.map((country) => (
+                <SortableCountryRow key={country.id} country={country} />
               ))}
             </tbody>
           </table>

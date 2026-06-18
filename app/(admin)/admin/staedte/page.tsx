@@ -10,14 +10,21 @@ export default async function AdminCitiesPage() {
   const userRole = headersList.get("x-user-role")
   if (!["ADMIN", "SUPER_ADMIN", "MODERATOR"].includes(userRole ?? "")) redirect("/")
 
-  const cities = await prisma.city.findMany({
-    orderBy: [{ sortOrder: "asc" }, { nameDE: "asc" }],
-    include: {
-      _count: {
-        select: { profiles: { where: { status: "APPROVED", kycStatus: "APPROVED" } } },
+  const [cities, countries] = await Promise.all([
+    prisma.city.findMany({
+      orderBy: [{ sortOrder: "asc" }, { nameDE: "asc" }],
+      include: {
+        _count: {
+          select: { profiles: { where: { status: "APPROVED", kycStatus: "APPROVED" } } },
+        },
       },
-    },
-  })
+    }),
+    prisma.country.findMany({
+      where: { isActive: true },
+      orderBy: [{ sortOrder: "asc" }, { nameDE: "asc" }],
+      select: { id: true, nameDE: true, flag: true },
+    }),
+  ])
 
   const landingCount = cities.filter((c) => c.showOnLanding).length
   const activeCount  = cities.filter((c) => c.isActive).length
@@ -52,12 +59,12 @@ export default async function AdminCitiesPage() {
       </div>
 
       {/* Add form */}
-      <AddCityForm />
+      <AddCityForm countries={countries} />
 
       {/* Table */}
       <div className="card-luxury overflow-hidden">
         <div className="overflow-x-auto">
-          <CitySortableList initialCities={cities} />
+          <CitySortableList initialCities={cities} countries={countries} />
         </div>
       </div>
 

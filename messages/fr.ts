@@ -423,6 +423,7 @@ const fr: Messages = {
     reviews: "Avis",
     auditLogs: "Journaux d'audit",
     settings: "Paramètres",
+    countries: "Pays",
     cities: "Villes",
     legalPages: "Pages légales",
     proDashboard: "← Tableau de bord pro",

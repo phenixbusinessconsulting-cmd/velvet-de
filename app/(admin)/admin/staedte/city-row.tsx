@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { updateCity, deleteCity } from "./actions"
 
+interface CountryOption {
+  id: string
+  nameDE: string
+  flag: string | null
+}
+
 interface CityRowProps {
   city: {
     id: string
@@ -19,12 +25,14 @@ interface CityRowProps {
     showOnLanding: boolean
     taglineDE: string | null
     taglineFR: string | null
+    countryId: string | null
     _count: { profiles: number }
   }
+  countries: CountryOption[]
   inSortable?: boolean
 }
 
-export function CityRow({ city, inSortable }: CityRowProps) {
+export function CityRow({ city, countries, inSortable }: CityRowProps) {
   const [editing, setEditing] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [form, setForm] = useState({
@@ -38,6 +46,7 @@ export function CityRow({ city, inSortable }: CityRowProps) {
     showOnLanding: city.showOnLanding,
     taglineDE: city.taglineDE ?? "",
     taglineFR: city.taglineFR ?? "",
+    countryId: city.countryId ?? "",
   })
 
   // Sync form state when server re-renders with fresh city data
@@ -53,8 +62,11 @@ export function CityRow({ city, inSortable }: CityRowProps) {
       showOnLanding: city.showOnLanding,
       taglineDE: city.taglineDE ?? "",
       taglineFR: city.taglineFR ?? "",
+      countryId: city.countryId ?? "",
     })
   }, [city])
+
+  const currentCountry = countries.find((c) => c.id === city.countryId)
 
   function handleSave() {
     startTransition(async () => {
@@ -62,6 +74,7 @@ export function CityRow({ city, inSortable }: CityRowProps) {
         ...form,
         taglineDE: form.taglineDE || null,
         taglineFR: form.taglineFR || null,
+        countryId: form.countryId || null,
       })
       setEditing(false)
     })
@@ -103,6 +116,18 @@ export function CityRow({ city, inSortable }: CityRowProps) {
       </td>
       <td className="px-4 py-3">
         <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="h-8 text-sm font-mono" />
+      </td>
+      <td className="px-4 py-3">
+        <select
+          value={form.countryId}
+          onChange={(e) => setForm({ ...form, countryId: e.target.value })}
+          className="h-8 w-full rounded-[var(--r-md)] border border-[var(--border)] bg-[var(--surface-2)] px-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)]"
+        >
+          <option value="">—</option>
+          {countries.map((c) => (
+            <option key={c.id} value={c.id}>{c.flag ? `${c.flag} ` : ""}{c.nameDE}</option>
+          ))}
+        </select>
       </td>
       <td className="px-4 py-3 space-y-1">
         <Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} placeholder="Bundesland" className="h-8 text-sm" />
@@ -148,6 +173,13 @@ export function CityRow({ city, inSortable }: CityRowProps) {
       </td>
       <td className="px-4 py-3">
         <span className="text-xs font-mono text-[var(--text-muted)] bg-[var(--surface-3)] px-2 py-0.5 rounded">{city.slug}</span>
+      </td>
+      <td className="px-4 py-3">
+        {currentCountry ? (
+          <span className="text-xs text-[var(--text-secondary)]">{currentCountry.flag ? `${currentCountry.flag} ` : ""}{currentCountry.nameDE}</span>
+        ) : (
+          <span className="text-xs text-[var(--text-muted)]">—</span>
+        )}
       </td>
       <td className="px-4 py-3">
         <p className="text-xs text-[var(--text-secondary)]">{city.state}</p>
