@@ -36,6 +36,12 @@ const fr: Messages = {
     ageRestriction: "Cette plateforme est réservée exclusivement aux personnes âgées de 18 ans et plus.",
     systemsOperational: "Tous les systèmes opérationnels",
   },
+  countryGate: {
+    label: "Sélection du pays",
+    title: "Choisissez votre pays",
+    subtitle: "Sélectionnez un pays pour découvrir les profils correspondants.",
+    change: "Changer de pays",
+  },
   ageGate: {
     label: "Vérification d'âge",
     title: "Veuillez confirmer votre âge",

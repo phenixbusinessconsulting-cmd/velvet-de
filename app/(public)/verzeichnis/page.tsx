@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { prisma } from "@/lib/prisma"
 import { getLocale, getMessages } from "@/lib/locale"
+import { requireCountry } from "@/lib/country"
 import type { PublicProfile } from "@/types"
 
 export const metadata: Metadata = {
@@ -25,12 +26,26 @@ export default async function DirectoryPage({ searchParams }: Props) {
   const page = Math.max(1, parseInt(params.page ?? "1"))
   const perPage = 20
 
+  // Scoping par pays : redirige vers la country gate si nécessaire
+  const country = await requireCountry("/verzeichnis")
+
+  // Filtre ville combiné (slug demandé + pays sélectionné)
+  const cityWhere = {
+    ...(cityFilter ? { slug: cityFilter } : {}),
+    ...(country ? { countryId: country.id } : {}),
+  }
+  const profileWhere = {
+    status: "APPROVED" as const,
+    kycStatus: "APPROVED" as const,
+    ...(Object.keys(cityWhere).length ? { city: cityWhere } : {}),
+  }
+
   const locale = await getLocale()
   const t = await getMessages(locale)
   const d = t.directory
 
   const activeCities = await prisma.city.findMany({
-    where: { isActive: true },
+    where: { isActive: true, ...(country ? { countryId: country.id } : {}) },
     orderBy: [{ sortOrder: "asc" }, { nameDE: "asc" }],
     select: { slug: true, nameDE: true, nameEN: true },
   })
@@ -42,11 +57,7 @@ export default async function DirectoryPage({ searchParams }: Props) {
 
   const [profiles, total] = await Promise.all([
     prisma.professionalProfile.findMany({
-      where: {
-        status: "APPROVED",
-        kycStatus: "APPROVED",
-        ...(cityFilter && { city: { slug: cityFilter } }),
-      },
+      where: profileWhere,
       include: {
         city: true,
         photos: {
@@ -60,11 +71,7 @@ export default async function DirectoryPage({ searchParams }: Props) {
       take: perPage,
     }),
     prisma.professionalProfile.count({
-      where: {
-        status: "APPROVED",
-        kycStatus: "APPROVED",
-        ...(cityFilter && { city: { slug: cityFilter } }),
-      },
+      where: profileWhere,
     }),
   ])
 

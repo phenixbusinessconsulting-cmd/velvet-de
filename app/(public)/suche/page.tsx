@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { prisma } from "@/lib/prisma"
 import { getLocale, getMessages } from "@/lib/locale"
+import { requireCountry } from "@/lib/country"
 import type { PublicProfile } from "@/types"
 
 export const metadata: Metadata = {
@@ -52,13 +53,16 @@ interface Props {
 export default async function SuchePage({ searchParams }: Props) {
   const params = await searchParams
 
+  // Scoping par pays : redirige vers la country gate si nécessaire
+  const country = await requireCountry("/suche")
+
   const locale = await getLocale()
   const t = await getMessages(locale)
   const s = t.search
 
   const [activeCities] = await Promise.all([
     prisma.city.findMany({
-      where: { isActive: true },
+      where: { isActive: true, ...(country ? { countryId: country.id } : {}) },
       orderBy: [{ sortOrder: "asc" }, { nameDE: "asc" }],
       select: { slug: true, nameDE: true },
     }),
@@ -66,10 +70,15 @@ export default async function SuchePage({ searchParams }: Props) {
 
   const languages = locale === "fr" ? LANGUAGES_FR : LANGUAGES_DE
 
+  const cityWhere = {
+    ...(params.city ? { slug: params.city } : {}),
+    ...(country ? { countryId: country.id } : {}),
+  }
+
   const where = {
     status: "APPROVED" as const,
     kycStatus: "APPROVED" as const,
-    ...(params.city && { city: { slug: params.city } }),
+    ...(Object.keys(cityWhere).length ? { city: cityWhere } : {}),
     ...(params.lang && { languages: { has: params.lang } }),
     ...(params.outcall === "1" && { outcall: true }),
     ...(params.incall === "1" && { incall: true }),

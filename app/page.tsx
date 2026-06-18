@@ -4,21 +4,35 @@ import { ChevronRight, Shield, Star, Lock, CheckCircle2 } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { AgeGate } from "@/components/layout/age-gate"
+import { CountryGate } from "@/components/layout/country-gate"
 import { CookieBanner } from "@/components/layout/cookie-banner"
 import { Button } from "@/components/ui/button"
 import { getLocale, getMessages } from "@/lib/locale"
+import { getActiveCountries, getSelectedCountry } from "@/lib/country"
 
 const TRUST_ICONS = [Shield, Lock, CheckCircle2, Star]
 
 export default async function LandingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ age_gate?: string }>
+  searchParams: Promise<{ age_gate?: string; country_gate?: string }>
 }) {
   const cookieStore = await cookies()
   const ageVerified = cookieStore.get("age_verified")?.value === "1"
   const params = await searchParams
   const showAgeGate = !ageVerified || params.age_gate === "1"
+
+  // Country gate : après l'âge, si des pays actifs existent et qu'aucun n'est choisi
+  const [activeCountries, selectedCountry] = await Promise.all([
+    getActiveCountries(),
+    getSelectedCountry(),
+  ])
+  const showCountryGate =
+    !showAgeGate &&
+    activeCountries.length > 0 &&
+    (!selectedCountry || params.country_gate === "1")
+
+  const showGate = showAgeGate || showCountryGate
 
   const locale = await getLocale()
   const t = await getMessages(locale)
@@ -27,8 +41,9 @@ export default async function LandingPage({
   return (
     <>
       {showAgeGate && <AgeGate />}
+      {showCountryGate && <CountryGate countries={activeCountries} />}
 
-      <div className={showAgeGate ? "blur-sm pointer-events-none select-none" : ""}>
+      <div className={showGate ? "blur-sm pointer-events-none select-none" : ""}>
         <Header />
 
         {/* HERO */}

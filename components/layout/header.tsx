@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { Menu, X } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 import { Button } from "@/components/ui/button"
+import { CountrySwitcher } from "@/components/layout/country-switcher"
 import { useLocale } from "@/context/locale"
 import { cn } from "@/lib/utils"
 
@@ -80,6 +81,9 @@ export function Header({ user }: HeaderProps) {
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
+            {/* Country switcher */}
+            <CountrySwitcher />
+
             {/* Language toggle DE ↔ FR */}
             <button
               onClick={switchLang}
@@ -142,6 +146,7 @@ export function Header({ user }: HeaderProps) {
               </Link>
             ))}
             <div className="divider-gold my-3" />
+            <CountrySwitcher className="w-full py-3 text-sm" />
             <button
               onClick={switchLang}
               disabled={isPending}

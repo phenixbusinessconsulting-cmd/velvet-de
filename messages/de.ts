@@ -34,6 +34,12 @@ const de = {
     ageRestriction: "Diese Plattform ist ausschließlich für Personen ab 18 Jahren bestimmt.",
     systemsOperational: "Alle Systeme betriebsbereit",
   },
+  countryGate: {
+    label: "Länderauswahl",
+    title: "Wählen Sie Ihr Land",
+    subtitle: "Wählen Sie ein Land, um die passenden Profile zu entdecken.",
+    change: "Land wechseln",
+  },
   ageGate: {
     label: "Altersverifikation",
     title: "Bitte bestätigen Sie Ihr Alter",
