@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: velvet
+      POSTGRES_USER: velvet
+      POSTGRES_PASSWORD: velvetpw
+    volumes:
+      - velvet_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U velvet"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3011:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://velvet:velvetpw@db:5432/velvet
+      JWT_SECRET: ${JWT_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://demo.monsitedemo-talens.fr}
+      NODE_ENV: production
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+    volumes:
+      - uploads:/app/public/uploads
+
+volumes:
+  velvet_db:
+  uploads:
